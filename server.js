@@ -55,6 +55,26 @@ app.post('/login', (req, res) => {
   });
 });
 
+app.post('/register', (req, res) => {
+  const { username, password } = req.body;
+  console.log('Received registration data:', req.body);  
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Все поля обязательны' });
+  }
+
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
+  db.run(
+    'INSERT INTO user (username, password) VALUES (?, ?)',
+    [username, hashedPassword],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true, id: this.lastID });
+    }
+  );
+});
+
 app.get('/books', (req, res) => {
   db.all('SELECT * FROM book', [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
