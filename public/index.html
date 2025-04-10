@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
@@ -7,6 +7,8 @@
 </head>
 <body>
   <h1>Библиотека</h1>
+
+  <!-- Форма добавления книги -->
   <form id="add-form">
     <input type="text" id="book-name" placeholder="Название книги" required />
     <input type="date" id="book-date" required />
@@ -15,7 +17,28 @@
     <button type="submit">Добавить</button>
   </form>
 
+  <!-- Кнопка для отображения всех книг -->
   <button id="show-books">Показать книги</button>
+
+  <!-- Поля для поиска книги -->
+  <div>
+    <input type="number" id="book-id" placeholder="ID книги" />
+    <button id="find-book-id">Найти книгу по ID</button>
+  </div>
+  <div>
+    <input type="text" id="book-name-search" placeholder="Название книги" />
+    <button id="find-book-name">Найти книгу по названию</button>
+  </div>
+
+  <!-- Кнопки для удаления книги -->
+  <div>
+    <input type="number" id="delete-book-id" placeholder="ID книги для удаления" />
+    <button id="delete-book-id-btn">Удалить книгу по ID</button>
+  </div>
+  <div>
+    <input type="text" id="delete-book-name" placeholder="Название книги для удаления" />
+    <button id="delete-book-name-btn">Удалить книгу по названию</button>
+  </div>
 
   <ul id="book-list"></ul>
 
@@ -32,6 +55,7 @@
       });
     }
 
+    // Добавление книги
     document.getElementById('add-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('book-name').value;
@@ -46,6 +70,62 @@
       });
 
       document.getElementById('add-form').reset();
+    });
+
+    // Поиск книги по ID
+    document.getElementById('find-book-id').addEventListener('click', async () => {
+      const bookId = document.getElementById('book-id').value;
+      const res = await fetch(`/book/${bookId}`);
+      const book = await res.json();
+      const list = document.getElementById('book-list');
+      list.innerHTML = '';
+      if (book) {
+        const li = document.createElement('li');
+        li.textContent = `${book.id}. ${book.name} | ${book.publish_date} | ${book.publisher} | Кол-во: ${book.count}`;
+        list.appendChild(li);
+      } else {
+        list.textContent = 'Книга не найдена';
+      }
+    });
+
+    // Поиск книги по названию
+    document.getElementById('find-book-name').addEventListener('click', async () => {
+      const bookName = document.getElementById('book-name-search').value;
+      const res = await fetch(`/books/name/${bookName}`);
+      const books = await res.json();
+      const list = document.getElementById('book-list');
+      list.innerHTML = '';
+      if (books.length > 0) {
+        books.forEach(book => {
+          const li = document.createElement('li');
+          li.textContent = `${book.id}. ${book.name} | ${book.publish_date} | ${book.publisher} | Кол-во: ${book.count}`;
+          list.appendChild(li);
+        });
+      } else {
+        list.textContent = 'Книги с таким названием не найдены';
+      }
+    });
+
+    // Удаление книги по ID
+    document.getElementById('delete-book-id-btn').addEventListener('click', async () => {
+      const bookId = document.getElementById('delete-book-id').value;
+      const res = await fetch(`/books/${bookId}`, { method: 'DELETE' });
+      if (res.ok) {
+        loadBooks();
+      } else {
+        alert('Ошибка при удалении книги');
+      }
+    });
+
+    // Удаление книги по названию
+    document.getElementById('delete-book-name-btn').addEventListener('click', async () => {
+      const bookName = document.getElementById('delete-book-name').value;
+      const res = await fetch(`/books/name/${bookName}`, { method: 'DELETE' });
+      if (res.ok) {
+        loadBooks();
+      } else {
+        alert('Ошибка при удалении книги');
+      }
     });
 
     document.getElementById('show-books').addEventListener('click', loadBooks);
