@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
@@ -10,15 +10,16 @@
 <body>
   <header>
     <div>
-      <img src="./img/book-svgrepo-com.svg" alt="">
+      <img src="./img/book-svgrepo-com.svg" alt="Логотип книги" />
     </div>
     <div class="authorization">
       <ul>
-        <li>Регистрация</li>
-        <li>Вход</li>
+        <li id="register-link">Регистрация</li>
+        <li id="login-link">Вход</li>
       </ul>
     </div>
   </header>
+  
   <main>
     <!-- Форма авторизации и регистрации -->
     <div class="authorization-form">
@@ -62,11 +63,11 @@
     <!-- Кнопки для удаления книги -->
     <div class="section">
       <input type="number" id="delete-book-id" placeholder="ID книги для удаления" />
-      <button class="delete-button">Удалить книгу по ID</button>
+      <button class="delete-button" id="delete-book-id-btn">Удалить книгу по ID</button>
     </div>
     <div class="section">
       <input type="text" id="delete-book-name" placeholder="Название книги для удаления" />
-      <button class="delete-button">Удалить книгу по названию</button>
+      <button class="delete-button" id="delete-book-name-btn">Удалить книгу по названию</button>
     </div>
 
     <!-- Кнопка для отображения всех книг -->
@@ -74,8 +75,8 @@
 
     <ul id="book-list"></ul>
   </main>
-  <script>
 
+  <script>
     // Показать форму регистрации
     document.getElementById('register-link').addEventListener('click', () => {
       document.getElementById('register-form').style.display = 'block';
@@ -127,18 +128,6 @@
         alert('Ошибка входа');
       }
     });
-
-    async function loadBooks() {
-      const res = await fetch('/books');
-      const books = await res.json();
-      const list = document.getElementById('book-list');
-      list.innerHTML = '';
-      books.forEach(book => {
-        const li = document.createElement('li');
-        li.textContent = `id: ${book.id} | Название: ${book.name} | Дата: ${book.publish_date} | Издательство: ${book.publisher} | Кол-во: ${book.count}`;
-        list.appendChild(li);
-      });
-    }
 
     // Добавление книги
     document.getElementById('add-form').addEventListener('submit', async (e) => {
@@ -212,6 +201,19 @@
         alert('Ошибка при удалении книги');
       }
     });
+
+    // Отображение всех книг
+    async function loadBooks() {
+      const res = await fetch('/books');
+      const books = await res.json();
+      const list = document.getElementById('book-list');
+      list.innerHTML = '';
+      books.forEach(book => {
+        const li = document.createElement('li');
+        li.textContent = `id: ${book.id} | Название: ${book.name} | Дата: ${book.publish_date} | Издательство: ${book.publisher} | Кол-во: ${book.count}`;
+        list.appendChild(li);
+      });
+    }
 
     document.getElementById('show-books').addEventListener('click', loadBooks);
   </script>
