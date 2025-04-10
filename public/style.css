@@ -36,3 +36,7 @@ button, input{
     padding: 0.5%;
     margin-bottom: 0.5%;
 }
+
+.delete-button, .admin-only {
+    display: none;
+  }
