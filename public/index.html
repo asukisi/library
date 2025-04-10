@@ -4,44 +4,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Управление библиотекой</title>
+  <link rel="stylesheet" href="./reset.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <h1>Библиотека</h1>
+  <header class="header">
+    <div>
+      <img src="./img/book-svgrepo-com.svg" alt="">
+    </div>
+    <div class="authorization">
+      <ul>
+        <li>Регистрация</li>
+        <li>Вход</li>
+      </ul>
+    </div>
+  </header>
+  <main class="main">
+    <h1>Библиотека</h1>
 
-  <!-- Форма добавления книги -->
-  <form id="add-form">
-    <input type="text" id="book-name" placeholder="Название книги" required />
-    <input type="date" id="book-date" required />
-    <input type="text" id="book-publisher" placeholder="Издательство" required />
-    <input type="number" id="book-count" placeholder="Кол-во" required min="1" />
-    <button type="submit">Добавить</button>
-  </form>
+    <!-- Форма добавления книги -->
+    <form id="add-form">
+      <input type="text" id="book-name" placeholder="Название книги" required />
+      <input type="date" id="book-date" required />
+      <input type="text" id="book-publisher" placeholder="Издательство" required />
+      <input type="number" id="book-count" placeholder="Кол-во" required min="1" />
+      <button type="submit">Добавить</button>
+    </form>
 
-  <!-- Кнопка для отображения всех книг -->
-  <button id="show-books">Показать книги</button>
+    <!-- Поля для поиска книги -->
+    <div class="section">
+      <input type="number" id="book-id" placeholder="ID книги" />
+      <button id="find-book-id">Найти книгу по ID</button>
+    </div>
 
-  <!-- Поля для поиска книги -->
-  <div>
-    <input type="number" id="book-id" placeholder="ID книги" />
-    <button id="find-book-id">Найти книгу по ID</button>
-  </div>
-  <div>
-    <input type="text" id="book-name-search" placeholder="Название книги" />
-    <button id="find-book-name">Найти книгу по названию</button>
-  </div>
+    <div class="section">
+      <input type="text" id="book-name-search" placeholder="Название книги" />
+      <button id="find-book-name">Найти книгу по названию</button>
+    </div>
+    
+    <!-- Кнопки для удаления книги -->
+    <div class="section">
+      <input type="number" id="delete-book-id" placeholder="ID книги для удаления" />
+      <button id="delete-book-id-btn">Удалить книгу по ID</button>
+    </div>
+    <div class="section">
+      <input type="text" id="delete-book-name" placeholder="Название книги для удаления" />
+      <button id="delete-book-name-btn">Удалить книгу по названию</button>
+    </div>
 
-  <!-- Кнопки для удаления книги -->
-  <div>
-    <input type="number" id="delete-book-id" placeholder="ID книги для удаления" />
-    <button id="delete-book-id-btn">Удалить книгу по ID</button>
-  </div>
-  <div>
-    <input type="text" id="delete-book-name" placeholder="Название книги для удаления" />
-    <button id="delete-book-name-btn">Удалить книгу по названию</button>
-  </div>
+    <!-- Кнопка для отображения всех книг -->
+    <button id="show-books">Отобразить все книги</button>
 
-  <ul id="book-list"></ul>
-
+    <ul id="book-list"></ul>
+  </main>
   <script>
     async function loadBooks() {
       const res = await fetch('/books');
