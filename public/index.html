@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Управление библиотекой</title>
+</head>
+<body>
+  <h1>Библиотека</h1>
+  <form id="add-form">
+    <input type="text" id="book-name" placeholder="Название книги" required />
+    <input type="date" id="book-date" required />
+    <input type="text" id="book-publisher" placeholder="Издательство" required />
+    <input type="number" id="book-count" placeholder="Кол-во" required min="1" />
+    <button type="submit">Добавить</button>
+  </form>
+
+  <button id="show-books">Показать книги</button>
+
+  <ul id="book-list"></ul>
+
+  <script>
+    async function loadBooks() {
+      const res = await fetch('/books');
+      const books = await res.json();
+      const list = document.getElementById('book-list');
+      list.innerHTML = '';
+      books.forEach(book => {
+        const li = document.createElement('li');
+        li.textContent = `${book.id}. ${book.name} | ${book.publish_date} | ${book.publisher} | Кол-во: ${book.count}`;
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById('add-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('book-name').value;
+      const publish_date = document.getElementById('book-date').value;
+      const publisher = document.getElementById('book-publisher').value;
+      const count = parseInt(document.getElementById('book-count').value);
+
+      await fetch('/books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, publish_date, publisher, count })
+      });
+
+      document.getElementById('add-form').reset();
+    });
+
+    document.getElementById('show-books').addEventListener('click', loadBooks);
+  </script>
+</body>
+</html>
