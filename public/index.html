@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <header class="header">
+  <header>
     <div>
       <img src="./img/book-svgrepo-com.svg" alt="">
     </div>
@@ -19,7 +19,24 @@
       </ul>
     </div>
   </header>
-  <main class="main">
+  <main>
+    <!-- Форма авторизации и регистрации -->
+    <div class="authorization-form">
+      <h2>Регистрация</h2>
+      <form id="register-form">
+        <input type="text" id="register-username" placeholder="Логин" required />
+        <input type="password" id="register-password" placeholder="Пароль" required />
+        <button type="submit">Зарегистрироваться</button>
+      </form>
+
+      <h2>Вход</h2>
+      <form id="login-form">
+        <input type="text" id="login-username" placeholder="Логин" required />
+        <input type="password" id="login-password" placeholder="Пароль" required />
+        <button type="submit">Войти</button>
+      </form>
+    </div>
+
     <h1>Библиотека</h1>
 
     <!-- Форма добавления книги -->
@@ -45,11 +62,11 @@
     <!-- Кнопки для удаления книги -->
     <div class="section">
       <input type="number" id="delete-book-id" placeholder="ID книги для удаления" />
-      <button id="delete-book-id-btn">Удалить книгу по ID</button>
+      <button class="delete-button">Удалить книгу по ID</button>
     </div>
     <div class="section">
       <input type="text" id="delete-book-name" placeholder="Название книги для удаления" />
-      <button id="delete-book-name-btn">Удалить книгу по названию</button>
+      <button class="delete-button">Удалить книгу по названию</button>
     </div>
 
     <!-- Кнопка для отображения всех книг -->
@@ -58,6 +75,59 @@
     <ul id="book-list"></ul>
   </main>
   <script>
+
+    // Показать форму регистрации
+    document.getElementById('register-link').addEventListener('click', () => {
+      document.getElementById('register-form').style.display = 'block';
+      document.getElementById('login-form').style.display = 'none';
+    });
+
+    // Показать форму входа
+    document.getElementById('login-link').addEventListener('click', () => {
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('register-form').style.display = 'none';
+    });
+
+    // Регистрация нового пользователя
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('register-username').value;
+      const password = document.getElementById('register-password').value;
+
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        alert('Регистрация успешна');
+      } else {
+        alert('Ошибка регистрации');
+      }
+    });
+
+    // Вход пользователя
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        alert('Вход успешен');
+      } else {
+        alert('Ошибка входа');
+      }
+    });
+
     async function loadBooks() {
       const res = await fetch('/books');
       const books = await res.json();
@@ -65,7 +135,7 @@
       list.innerHTML = '';
       books.forEach(book => {
         const li = document.createElement('li');
-        li.textContent = `${book.id}. ${book.name} | ${book.publish_date} | ${book.publisher} | Кол-во: ${book.count}`;
+        li.textContent = `id: ${book.id} | Название: ${book.name} | Дата: ${book.publish_date} | Издательство: ${book.publisher} | Кол-во: ${book.count}`;
         list.appendChild(li);
       });
     }

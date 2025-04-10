@@ -1,7 +1,8 @@
 header{
     display: flex;
     justify-content: space-between;
-    margin: 0.5rem 0;
+    align-items: center;
+    margin: 1% 0;
     background-color: rgb(199, 125, 255); 
 }
 
@@ -9,19 +10,29 @@ main{
     margin: 0  20%;
 }
 
-button{
-    padding: 0.2rem;
-    margin-top: 0.5rem;
+button, input{
+    padding: 1%;
+    margin: 0.5%;
+}
+
+.delete-button{
+    color: white;
+    background-color: red;
+}
+
+.authorization ul{
+    display: flex;
+    gap: 5px;
 }
 
 #add-form{
     border: black 2px solid;
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
+    padding: 0.5%;
+    margin-bottom: 0.5%;
 }
 
 .section{
     border: black 2px solid;
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
+    padding: 0.5%;
+    margin-bottom: 0.5%;
 }

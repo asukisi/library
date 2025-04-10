@@ -2,6 +2,7 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs');  // для хэширования паролей
 
 const app = express();
 const db = new sqlite3.Database('db.sqlite');
@@ -9,6 +10,50 @@ const db = new sqlite3.Database('db.sqlite');
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Регистрация пользователя
+app.post('/register', (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Все поля обязательны' });
+  }
+
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
+  db.run(
+    'INSERT INTO user (username, password) VALUES (?, ?)',
+    [username, hashedPassword],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true, id: this.lastID });
+    }
+  );
+});
+
+// Вход пользователя
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Все поля обязательны' });
+  }
+
+  db.get('SELECT * FROM user WHERE username = ?', [username], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (!row) {
+      return res.status(400).json({ error: 'Пользователь не найден' });
+    }
+
+    const isPasswordValid = bcrypt.compareSync(password, row.password);
+    if (isPasswordValid) {
+      res.json({ success: true, userId: row.id });
+    } else {
+      res.status(400).json({ error: 'Неверный пароль' });
+    }
+  });
+});
 
 app.get('/books', (req, res) => {
   db.all('SELECT * FROM book', [], (err, rows) => {
