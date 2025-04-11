@@ -1,50 +1,54 @@
-header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 1vh 0;
-    background-color: rgb(199, 125, 255); 
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1vh 0;
+  background-color: rgb(199, 125, 255);
 }
 
-main{
-    margin: 0  20vh;
+main {
+  margin: 0 20vh;
 }
 
-button, input{
-    padding: 1vh;
-    margin: 0.5vh;
+button,
+input {
+  padding: 1vh;
+  margin: 0.5vh;
 }
 
-.delete-button{
-    color: white;
-    background-color: red;
+.delete-button {
+  color: white;
+  background-color: red;
 }
 
-.authorization ul{
-    display: flex;
-    gap: 5px;
+.authorization ul {
+  display: flex;
+  gap: 5px;
 }
 
-.section{
-    border: grey 1px solid;
-    padding: 0.5vh;
-    margin-bottom: 0.5vh;
+.section {
+  border: grey 1px solid;
+  padding: 0.5vh;
+  margin-bottom: 0.5vh;
 }
 
-.delete-button, .admin-only {
-    display: none;
-  }
+.admin-only {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
-  .heder-left{
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-  }
+.heder-left {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
 
-  button{
-    cursor: pointer;
-  }
+button {
+  cursor: pointer;
+}
 
-  .hidden{
-    display: none;
-  }
+#show ul {
+  margin: 20px;
+  background-color: rgb(224, 170, 255);
+}

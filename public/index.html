@@ -1,271 +1,353 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Управление библиотекой</title>
-  <link rel="stylesheet" href="./reset.css">
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-  <header>
-    <div>
-      <img src="./img/book-svgrepo-com.svg" alt="">
-    </div>
-    <div class="heder-left">
-      <div id="user-info" style="display: none;">
-        <span id="user-name"></span> | <span id="user-role"></span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Управление библиотекой</title>
+    <link rel="stylesheet" href="./reset.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <img src="./img/book-svgrepo-com.svg" alt="" />
       </div>
-      <button id="authorization-btn">Авторизация</button>
-  </div>
-  </header>
+      <div class="heder-left">
+        <div id="user-info" style="display: none">
+          <span id="user-name"></span> | <span id="user-role"></span>
+        </div>
+        <button id="authorization-btn">Авторизация</button>
+      </div>
+    </header>
 
-  <main>
-    <!-- Форма авторизации и регистрации -->
-    <div class="hidden" id="authorization-form">
-      <div id="register-form">
-        <h2>Регистрация</h2>
-        <form>
-          <input type="text" id="register-username" placeholder="Логин" required />
-          <input type="password" id="register-password" placeholder="Пароль" required />
-          <button type="submit">Зарегистрироваться</button>
-        </form>
+    <main>
+      <!-- Форма авторизации и регистрации -->
+      <div class="hidden" id="authorization-form">
+        <div id="register-form">
+          <h2>Регистрация</h2>
+          <form>
+            <input
+              type="text"
+              id="register-username"
+              placeholder="Логин"
+              required
+            />
+            <input
+              type="password"
+              id="register-password"
+              placeholder="Пароль"
+              required
+            />
+            <button type="submit">Зарегистрироваться</button>
+          </form>
+        </div>
+
+        <div id="login-form">
+          <h2>Вход</h2>
+          <form>
+            <input
+              type="text"
+              id="login-username"
+              placeholder="Логин"
+              required
+            />
+            <input
+              type="password"
+              id="login-password"
+              placeholder="Пароль"
+              required
+            />
+            <button type="submit">Войти</button>
+          </form>
+        </div>
       </div>
 
-      <div id="login-form">
-        <h2>Вход</h2>
-        <form>
-          <input type="text" id="login-username" placeholder="Логин" required />
-          <input type="password" id="login-password" placeholder="Пароль" required />
-          <button type="submit">Войти</button>
-        </form>
+      <h1>Библиотека</h1>
+
+      <!-- Форма добавления книги -->
+      <form class="section" id="add-form">
+        <input
+          class="admin-only"
+          type="text"
+          id="book-name"
+          placeholder="Название книги"
+          required
+        />
+        <input class="admin-only" type="date" id="book-date" required />
+        <input
+          class="admin-only"
+          type="text"
+          id="book-publisher"
+          placeholder="Издательство"
+          required
+        />
+        <input
+          class="admin-only"
+          type="number"
+          id="book-count"
+          placeholder="Кол-во"
+          required
+          min="1"
+        />
+        <button class="admin-only" type="submit">Добавить</button>
+      </form>
+
+      <!-- Поиск книги -->
+      <div class="section">
+        <input type="number" id="book-id" placeholder="ID книги" />
+        <button id="find-book-id">Найти книгу по ID</button>
       </div>
-    </div>
 
-    <h1>Библиотека</h1>
+      <div class="section">
+        <input type="text" id="book-name-search" placeholder="Название книги" />
+        <button id="find-book-name">Найти книгу по названию</button>
+      </div>
 
-    <!-- Форма добавления книги -->
-    <form class="section" id="add-form" class=".admin-only">
-      <input type="text" id="book-name" placeholder="Название книги" required />
-      <input type="date" id="book-date" required />
-      <input type="text" id="book-publisher" placeholder="Издательство" required />
-      <input type="number" id="book-count" placeholder="Кол-во" required min="1" />
-      <button type="submit">Добавить</button>
-    </form>
+      <!-- Удаление книги -->
+      <div class="section">
+        <input
+          class="admin-only"
+          type="number"
+          id="delete-book-id"
+          placeholder="ID книги для удаления"
+        />
+        <button class="delete-button admin-only" id="delete-book-id-btn">
+          Удалить книгу по ID
+        </button>
+      </div>
+      <div class="section">
+        <input
+          class="admin-only"
+          type="text"
+          id="delete-book-name"
+          placeholder="Название книги для удаления"
+        />
+        <button class="delete-button admin-only" id="delete-book-name-btn">
+          Удалить книгу по названию
+        </button>
+      </div>
 
-    <!-- Поиск книги -->
-    <div class="section">
-      <input type="number" id="book-id" placeholder="ID книги" />
-      <button id="find-book-id">Найти книгу по ID</button>
-    </div>
+      <button id="show-books">Отобразить все книги</button>
+      <button id="show-users">Отобразить всех пользователей</button>
+      <div id="show">
+        <ul id="book-list"></ul>
+        <ul id="user-list"></ul>
+      </div>
+    </main>
 
-    <div class="section">
-      <input type="text" id="book-name-search" placeholder="Название книги" />
-      <button id="find-book-name">Найти книгу по названию</button>
-    </div>
+    <script>
+      // Регистрация
+      document
+        .getElementById("register-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const username = document.getElementById("register-username").value;
+          const password = document.getElementById("register-password").value;
 
-    <!-- Удаление книги -->
-    <div class="section">
-      <input type="number" id="delete-book-id" placeholder="ID книги для удаления" />
-      <button class="delete-button admin-only" id="delete-book-id-btn">Удалить книгу по ID</button>
-    </div>
-    <div class="section">
-      <input type="text" id="delete-book-name" placeholder="Название книги для удаления" />
-      <button class="delete-button admin-only" id="delete-book-name-btn">Удалить книгу по названию</button>
-    </div>
+          try {
+            const res = await fetch("/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, password }),
+            });
 
-    <!-- Отображение всех книг -->
-    <button id="show-books">Отобразить все книги</button>
-    <ul id="book-list"></ul>
-  </main>
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Ошибка регистрации");
 
-  <script>
-    // Скрыть кнопки управления по умолчанию
-    window.isAdmin = false;
-    document.getElementById('add-form').style.display = 'none';
-    document.querySelectorAll('.delete-button').forEach(btn => {
-      btn.style.display = 'none';
-    });
+            alert("Регистрация успешна");
+            document.getElementById("register-form").reset();
+          } catch (error) {
+            alert(error.message);
+          }
+        });
 
-    // Переключение форм 
-    document.getElementById("authorization-btn").addEventListener('click', ()=>{
-      document.getElementById("authorization-form").classList.toggle("hidden")
-    });
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const username = document.getElementById("login-username").value;
+          const password = document.getElementById("login-password").value;
 
-    // Регистрация
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const username = document.getElementById('register-username').value;
-  const password = document.getElementById('register-password').value;
+          try {
+            const res = await fetch("/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, password }),
+            });
 
-  try {
-    const res = await fetch('/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || "Login failed");
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Ошибка регистрации');
-    
-    alert('Регистрация успешна');
-    document.getElementById('register-form').reset();
-  } catch (error) {
-    alert(error.message);
-  }
-});
+            // Сохраняем данные пользователя
+            window.currentUser = {
+              username: data.username,
+              isAdmin: data.isAdmin,
+            };
 
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const username = document.getElementById('login-username').value;
-  const password = document.getElementById('login-password').value;
+            // Обновляем интерфейс
+            document.getElementById("user-name").textContent = data.username;
+            document.getElementById("user-role").textContent = data.isAdmin
+              ? "Admin"
+              : "User";
+            document.getElementById("user-info").style.display = "block";
 
-  try {
-    const res = await fetch('/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
+            const adminElements = document.querySelectorAll(".admin-only");
+            adminElements.forEach((element) => {
+              if (data.isAdmin) {
+                element.classList.remove("admin-only"); // Удаляем класс
+                element.disabled = false; // Разблокируем элементы
+              } else {
+                element.classList.add("admin-only"); // Добавляем класс
+                element.disabled = true; // Блокируем элементы
+              }
+            });
 
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Login failed');
-    
-    // Сохраняем данные пользователя
-    window.currentUser = {
-      username: data.username,
-      isAdmin: data.isAdmin
-    };
-    
-    // Обновляем интерфейс
-    document.getElementById('user-name').textContent = data.username;
-    document.getElementById('user-role').textContent = data.isAdmin ? 'Admin' : 'User';
-    document.getElementById('user-info').style.display = 'block';
-    // Показываем форму добавления, если админ
-    if (data.isAdmin) {
-      document.getElementById('add-form').style.display = 'block';
-      }
+            alert("Login successful!");
+          } catch (error) {
+            alert(error.message);
+          }
+        });
 
-    
-    // Показываем/скрываем админ-кнопки
-    const adminButtons = document.querySelectorAll('.admin-only');
-    adminButtons.forEach(btn => {
-      btn.style.display = data.isAdmin ? 'block' : 'none';
-    });
-    
-    alert('Login successful!');
-  } catch (error) {
-    alert(error.message);
-  }
-});
-
-    // Загрузить все книги
-    async function loadBooks() {
-      const res = await fetch('/books');
-      const books = await res.json();
-      const list = document.getElementById('book-list');
-      list.innerHTML = '';
-      books.forEach(book => {
-        const li = document.createElement('li');
-        li.textContent = `id: ${book.id} | Название: ${book.name} | Дата: ${book.publish_date} | Издательство: ${book.publisher} | Кол-во: ${book.count}`;
-        list.appendChild(li);
-      });
-    }
-
-    // Добавление книги
-    document.getElementById('add-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('book-name').value;
-      const publish_date = document.getElementById('book-date').value;
-      const publisher = document.getElementById('book-publisher').value;
-      const count = parseInt(document.getElementById('book-count').value);
-
-      await fetch('/books', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, publish_date, publisher, count })
-      });
-
-      document.getElementById('add-form').reset();
-    });
-
-    // Поиск по ID
-    document.getElementById('find-book-id').addEventListener('click', async () => {
-      const bookId = document.getElementById('book-id').value;
-      const res = await fetch(`/book/${bookId}`);
-      const book = await res.json();
-      const list = document.getElementById('book-list');
-      list.innerHTML = '';
-      if (book) {
-        const li = document.createElement('li');
-        li.textContent = `${book.id}. ${book.name} | ${book.publish_date} | ${book.publisher} | Кол-во: ${book.count}`;
-        list.appendChild(li);
-      } else {
-        list.textContent = 'Книга не найдена';
-      }
-    });
-
-    // Поиск по названию
-    document.getElementById('find-book-name').addEventListener('click', async () => {
-      const bookName = document.getElementById('book-name-search').value;
-      const res = await fetch(`/books/name/${bookName}`);
-      const books = await res.json();
-      const list = document.getElementById('book-list');
-      list.innerHTML = '';
-      if (books.length > 0) {
-        books.forEach(book => {
-          const li = document.createElement('li');
-          li.textContent = `${book.id}. ${book.name} | ${book.publish_date} | ${book.publisher} | Кол-во: ${book.count}`;
+      // Загрузить все книги
+      async function loadBooks() {
+        const res = await fetch("/books");
+        console.log(res);
+        const books = await res.json();
+        const list = document.getElementById("book-list");
+        list.innerHTML = "";
+        books.forEach((book) => {
+          const li = document.createElement("li");
+          li.textContent = `id: ${book.id} | Название: ${book.name} | Дата: ${book.publish_date} | Издательство: ${book.publisher} | Кол-во: ${book.count}`;
           list.appendChild(li);
         });
-      } else {
-        list.textContent = 'Книги с таким названием не найдены';
       }
-    });
 
-    // Удаление по ID
-document.getElementById('delete-book-id-btn').addEventListener('click', async () => {
-  if (!window.currentUser?.isAdmin) {
-    alert('Требуются права администратора');
-    return;
-  }
+      async function loadUsers() {
+        const res = await fetch("/user");
+        console.log(res);
+        const users = await res.json();
+        const list = document.getElementById("user-list");
+        list.innerHTML = "";
+        users.forEach((user) => {
+          const li = document.createElement("li");
+          li.textContent = `id: ${user.id} | имя: ${user.username} | роль: ${user.is_admin}`;
+          list.appendChild(li);
+        });
+      }
 
-  const bookId = document.getElementById('delete-book-id').value;
-  try {
-    const res = await fetch(`/books/${bookId}?isAdmin=true`, { 
-      method: 'DELETE'
-    });
-    
-    if (!res.ok) throw new Error('Ошибка удаления');
-    loadBooks();
-    alert('Книга удалена');
-  } catch (error) {
-    alert(error.message);
-  }
-});
+      // Добавление книги
+      document
+        .getElementById("add-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const name = document.getElementById("book-name").value;
+          const publish_date = document.getElementById("book-date").value;
+          const publisher = document.getElementById("book-publisher").value;
+          const count = parseInt(document.getElementById("book-count").value);
 
-// Удаление по названию
-document.getElementById('delete-book-name-btn').addEventListener('click', async () => {
-  if (!window.currentUser?.isAdmin) {
-    alert('Требуются права администратора');
-    return;
-  }
+          await fetch("/books", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, publish_date, publisher, count }),
+          });
 
-  const bookName = document.getElementById('delete-book-name').value;
-  try {
-    const res = await fetch(`/books/name/${encodeURIComponent(bookName)}?isAdmin=true`, { 
-      method: 'DELETE'
-    });
-    
-    if (!res.ok) throw new Error('Ошибка удаления');
-    loadBooks();
-    alert('Книги удалены');
-  } catch (error) {
-    alert(error.message);
-  }
-});
+          document.getElementById("add-form").reset();
+        });
 
-    // Кнопка "показать все"
-    document.getElementById('show-books').addEventListener('click', loadBooks);
-  </script>
-</body>
+      // Поиск по ID
+      document
+        .getElementById("find-book-id")
+        .addEventListener("click", async () => {
+          const bookId = document.getElementById("book-id").value;
+          const res = await fetch(`/book/${bookId}`);
+          const book = await res.json();
+          const list = document.getElementById("book-list");
+          list.innerHTML = "";
+          if (book) {
+            const li = document.createElement("li");
+            li.textContent = `${book.id}. ${book.name} | ${book.publish_date} | ${book.publisher} | Кол-во: ${book.count}`;
+            list.appendChild(li);
+          } else {
+            list.textContent = "Книга не найдена";
+          }
+        });
+
+      // Поиск по названию
+      document
+        .getElementById("find-book-name")
+        .addEventListener("click", async () => {
+          const bookName = document.getElementById("book-name-search").value;
+          const res = await fetch(`/books/name/${bookName}`);
+          const books = await res.json();
+          const list = document.getElementById("book-list");
+          list.innerHTML = "";
+          if (books.length > 0) {
+            books.forEach((book) => {
+              const li = document.createElement("li");
+              li.textContent = `${book.id}. ${book.name} | ${book.publish_date} | ${book.publisher} | Кол-во: ${book.count}`;
+              list.appendChild(li);
+            });
+          } else {
+            list.textContent = "Книги с таким названием не найдены";
+          }
+        });
+
+      // Удаление по ID
+      document
+        .getElementById("delete-book-id-btn")
+        .addEventListener("click", async () => {
+          if (!window.currentUser?.isAdmin) {
+            alert("Требуются права администратора");
+            return;
+          }
+
+          const bookId = document.getElementById("delete-book-id").value;
+          try {
+            const res = await fetch(`/books/${bookId}?isAdmin=true`, {
+              method: "DELETE",
+            });
+
+            if (!res.ok) throw new Error("Ошибка удаления");
+            loadBooks();
+            alert("Книга удалена");
+          } catch (error) {
+            alert(error.message);
+          }
+        });
+
+      // Удаление по названию
+      document
+        .getElementById("delete-book-name-btn")
+        .addEventListener("click", async () => {
+          if (!window.currentUser?.isAdmin) {
+            alert("Требуются права администратора");
+            return;
+          }
+
+          const bookName = document.getElementById("delete-book-name").value;
+          try {
+            const res = await fetch(
+              `/books/name/${encodeURIComponent(bookName)}?isAdmin=true`,
+              {
+                method: "DELETE",
+              }
+            );
+
+            if (!res.ok) throw new Error("Ошибка удаления");
+            loadBooks();
+            alert("Книги удалены");
+          } catch (error) {
+            alert(error.message);
+          }
+        });
+
+      // Кнопка "показать все"
+      document
+        .getElementById("show-books")
+        .addEventListener("click", loadBooks);
+      document
+        .getElementById("show-users")
+        .addEventListener("click", loadUsers);
+    </script>
+  </body>
 </html>
