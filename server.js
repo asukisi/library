@@ -77,4 +77,27 @@ app.delete('/books/name/:name', (req, res) => {
   });
 });
 
+//поиск по id
+app.get('/book/:id', (req, res) => {
+  const bookId = req.params.id;
+  db.get('SELECT * FROM book WHERE id = ?', [bookId], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: 'Книга не найдена' });
+    res.json(row);
+  });
+});
+
+// Поиск книги по части названия (GET /books/name/:name)
+app.get('/books/name/:name', (req, res) => {
+  const searchTerm = `%${req.params.name}%`;
+  db.all(
+    'SELECT * FROM book WHERE name LIKE ?',
+    [searchTerm],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    }
+  );
+});
+
 app.listen(3000, () => console.log('Сервер запущен на порту 3000'));

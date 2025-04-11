@@ -2,17 +2,17 @@ header{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 1% 0;
+    margin: 1vh 0;
     background-color: rgb(199, 125, 255); 
 }
 
 main{
-    margin: 0  20%;
+    margin: 0  20vh;
 }
 
 button, input{
-    padding: 1%;
-    margin: 0.5%;
+    padding: 1vh;
+    margin: 0.5vh;
 }
 
 .delete-button{
@@ -25,18 +25,26 @@ button, input{
     gap: 5px;
 }
 
-#add-form{
-    border: black 2px solid;
-    padding: 0.5%;
-    margin-bottom: 0.5%;
-}
-
 .section{
-    border: black 2px solid;
-    padding: 0.5%;
-    margin-bottom: 0.5%;
+    border: grey 1px solid;
+    padding: 0.5vh;
+    margin-bottom: 0.5vh;
 }
 
 .delete-button, .admin-only {
+    display: none;
+  }
+
+  .heder-left{
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+  }
+
+  button{
+    cursor: pointer;
+  }
+
+  .hidden{
     display: none;
   }
