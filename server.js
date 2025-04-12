@@ -2,14 +2,38 @@ const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
 const path = require("path");
+const multer = require("multer");
+const fs = require("fs");
+const ExcelJS = require("exceljs");
 
 const app = express();
 const db = new sqlite3.Database("./db.sqlite");
 
-// Middleware
+// Настройка multer для загрузки файлов
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, "uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer({ storage: storage });
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(express.urlencoded({ extended: true })); // для form-data без файлов
 
 // Регистрация
 app.post("/register", (req, res) => {
@@ -50,17 +74,64 @@ app.get("/books", (req, res) => {
   });
 });
 
-// Добавить книгу
-app.post("/books", (req, res) => {
-  const { name, publish_date, publisher, count } = req.body;
-  db.run(
-    "INSERT INTO book (name, publish_date, publisher, count) VALUES (?, ?, ?, ?)",
-    [name, publish_date, publisher, count],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ success: true });
+// Добавляем новый маршрут для скачивания книги
+app.get("/books/download/:id", (req, res) => {
+  const bookId = req.params.id;
+
+  db.get("SELECT pdf_filename FROM book WHERE id = ?", [bookId], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row || !row.pdf_filename) {
+      return res.status(404).json({ error: "Файл не найден" });
     }
-  );
+
+    const filePath = path.join(__dirname, "uploads", row.pdf_filename);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: "Файл не найден на сервере" });
+    }
+
+    // Вот здесь используем res.download с указанием имени файла
+    res.download(filePath, row.pdf_filename, (err) => {
+      if (err) {
+        console.error("Ошибка при скачивании файла:", err);
+        res.status(500).json({ error: "Ошибка при скачивании файла" });
+      }
+    });
+  });
+});
+
+app.post("/books", upload.single("book-pdf"), async (req, res) => {
+  try {
+    const { name, publish_date, publisher, count } = req.body;
+    const pdf_filename = req.file ? req.file.filename : null;
+
+    // Валидация данных
+    if (!name || !publish_date || !publisher || !count) {
+      return res
+        .status(400)
+        .json({ error: "Все поля обязательны для заполнения" });
+    }
+
+    db.run(
+      "INSERT INTO book (name, publish_date, publisher, count, pdf_filename) VALUES (?, ?, ?, ?, ?)",
+      [name, publish_date, publisher, count, pdf_filename],
+      function (err) {
+        if (err) {
+          console.error("Ошибка базы данных:", err);
+          return res
+            .status(500)
+            .json({ error: "Ошибка при добавлении книги в базу данных" });
+        }
+
+        res.json({
+          success: true,
+          id: this.lastID,
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Ошибка сервера:", error);
+    res.status(500).json({ error: "Внутренняя ошибка сервера" });
+  }
 });
 
 // Удалить книгу по id
@@ -83,7 +154,7 @@ app.delete("/books/name/:name", (req, res) => {
   );
 });
 
-//поиск по id
+// Поиск книги по id
 app.get("/book/:id", (req, res) => {
   const bookId = req.params.id;
   db.get("SELECT * FROM book WHERE id = ?", [bookId], (err, row) => {
@@ -93,21 +164,65 @@ app.get("/book/:id", (req, res) => {
   });
 });
 
-// Поиск книги по части названия (GET /books/name/:name)
+// Поиск книги по части названия
 app.get("/books/name/:name", (req, res) => {
-  const searchTerm = `%${req.params.name}%`;
-  db.all("SELECT * FROM book WHERE name LIKE ?", [searchTerm], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
+  db.all(
+    "SELECT * FROM book WHERE name LIKE ?",
+    [`%${req.params.name}%`],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    }
+  );
 });
 
-// отображение всех плользователей
+// Пользователи
 app.get("/user", (req, res) => {
-  db.all("SELECT * FROM user", (err, rows) => {
+  db.all("SELECT id, username, is_admin FROM user", (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
 });
 
-app.listen(3000, () => console.log("Сервер запущен на порту 3000"));
+// эскпорт
+app.get("/export-books", (req, res) => {
+  db.all("SELECT * FROM book", async (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Книги");
+
+    // Заголовки столбцов
+    worksheet.columns = [
+      { header: "ID", key: "id", width: 10 },
+      { header: "Название", key: "name", width: 30 },
+      { header: "Дата публикации", key: "publish_date", width: 15 },
+      { header: "Издательство", key: "publisher", width: 25 },
+      { header: "Количество", key: "count", width: 12 },
+      { header: "Имя PDF-файла", key: "pdf_filename", width: 40 },
+    ];
+
+    // Заполнение строк
+    rows.forEach((row) => {
+      worksheet.addRow(row);
+    });
+
+    // Настройка заголовков HTTP
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    res.setHeader("Content-Disposition", "attachment; filename=books.xlsx");
+
+    // Отправка файла
+    await workbook.xlsx.write(res);
+    res.end();
+  });
+});
+
+// Запуск сервера
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});

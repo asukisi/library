@@ -52,3 +52,7 @@ button {
   margin: 20px;
   background-color: rgb(224, 170, 255);
 }
+
+.hidden {
+  display: none;
+}

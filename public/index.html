@@ -89,6 +89,13 @@
           required
           min="1"
         />
+        <input
+          class="admin-only"
+          type="file"
+          id="book-pdf"
+          name="book-pdf"
+          accept="application/pdf"
+        />
         <button class="admin-only" type="submit">Добавить</button>
       </form>
 
@@ -106,6 +113,7 @@
       <!-- Удаление книги -->
       <div class="section">
         <input
+          disabled
           class="admin-only"
           type="number"
           id="delete-book-id"
@@ -127,8 +135,47 @@
         </button>
       </div>
 
+      <!-- Форма обновления книги -->
+      <form class="section admin-only" id="update-form">
+        <input
+          type="number"
+          id="update-book-id"
+          placeholder="ID книги"
+          required
+        />
+        <input
+          type="text"
+          id="update-book-name"
+          placeholder="Новое название"
+          required
+        />
+        <input
+          type="date"
+          id="update-book-date"
+          placeholder="Новая дата"
+          required
+        />
+        <input
+          type="text"
+          id="update-book-publisher"
+          placeholder="Новое издательство"
+          required
+        />
+        <input
+          type="number"
+          id="update-book-count"
+          placeholder="Новое количество"
+          required
+          min="1"
+        />
+        <button type="submit">Обновить книгу</button>
+      </form>
+
       <button id="show-books">Отобразить все книги</button>
-      <button id="show-users">Отобразить всех пользователей</button>
+      <button class="admin-only" id="show-users">
+        Отобразить всех пользователей
+      </button>
+      <button id="export-books">Экспортировать книги (CSV)</button>
       <div id="show">
         <ul id="book-list"></ul>
         <ul id="user-list"></ul>
@@ -136,6 +183,14 @@
     </main>
 
     <script>
+      document
+        .getElementById("authorization-btn")
+        .addEventListener("click", () => {
+          document
+            .getElementById("authorization-form")
+            .classList.toggle("hidden");
+        });
+
       // Регистрация
       document
         .getElementById("register-form")
@@ -208,50 +263,154 @@
           }
         });
 
-      // Загрузить все книги
+      // Модифицируем функцию loadBooks для добавления кнопки скачивания
       async function loadBooks() {
         const res = await fetch("/books");
-        console.log(res);
         const books = await res.json();
         const list = document.getElementById("book-list");
         list.innerHTML = "";
+
         books.forEach((book) => {
           const li = document.createElement("li");
           li.textContent = `id: ${book.id} | Название: ${book.name} | Дата: ${book.publish_date} | Издательство: ${book.publisher} | Кол-во: ${book.count}`;
+
+          if (book.pdf_filename) {
+            const downloadBtn = document.createElement("button");
+            downloadBtn.textContent = "Скачать PDF";
+            downloadBtn.addEventListener("click", () => downloadBook(book.id));
+            li.appendChild(document.createElement("br"));
+            li.appendChild(downloadBtn);
+          }
+
           list.appendChild(li);
         });
       }
 
       async function loadUsers() {
-        const res = await fetch("/user");
-        console.log(res);
-        const users = await res.json();
-        const list = document.getElementById("user-list");
-        list.innerHTML = "";
-        users.forEach((user) => {
-          const li = document.createElement("li");
-          li.textContent = `id: ${user.id} | имя: ${user.username} | роль: ${user.is_admin}`;
-          list.appendChild(li);
-        });
+        if (!window.currentUser?.isAdmin) {
+          alert("Требуются права администратора");
+        } else {
+          const res = await fetch("/user");
+          console.log(res);
+          const users = await res.json();
+          const list = document.getElementById("user-list");
+          list.innerHTML = "";
+          users.forEach((user) => {
+            const li = document.createElement("li");
+            li.textContent = `id: ${user.id} | имя: ${user.username} | роль: ${user.is_admin}`;
+            list.appendChild(li);
+          });
+        }
       }
 
-      // Добавление книги
       document
         .getElementById("add-form")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
-          const name = document.getElementById("book-name").value;
-          const publish_date = document.getElementById("book-date").value;
-          const publisher = document.getElementById("book-publisher").value;
-          const count = parseInt(document.getElementById("book-count").value);
 
-          await fetch("/books", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, publish_date, publisher, count }),
-          });
+          try {
+            const formData = new FormData();
+            formData.append("name", document.getElementById("book-name").value);
+            formData.append(
+              "publish_date",
+              document.getElementById("book-date").value
+            );
+            formData.append(
+              "publisher",
+              document.getElementById("book-publisher").value
+            );
+            formData.append(
+              "count",
+              document.getElementById("book-count").value
+            );
 
-          document.getElementById("add-form").reset();
+            const pdfFile = document.getElementById("book-pdf").files[0];
+            if (pdfFile) {
+              formData.append("book-pdf", pdfFile);
+            }
+
+            const res = await fetch("/books", {
+              method: "POST",
+              body: formData, // Не устанавливайте Content-Type вручную, браузер сделает это сам
+            });
+
+            if (!res.ok) {
+              const errorText = await res.text();
+              console.error("Ошибка ответа:", errorText);
+              throw new Error(errorText || "Ошибка при добавлении книги");
+            }
+
+            const data = await res.json();
+            alert(`Книга успешно добавлена с ID: ${data.id}`);
+            document.getElementById("add-form").reset();
+            loadBooks();
+          } catch (error) {
+            console.error("Ошибка:", error);
+            alert(`Ошибка: ${error.message}`);
+          }
+        });
+
+      // Функция для скачивания книги
+      async function downloadBook(bookId) {
+        try {
+          const response = await fetch(`/books/download/${bookId}`);
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Ошибка при скачивании");
+          }
+
+          // Создаем blob из ответа
+          const blob = await response.blob();
+
+          // Создаем ссылку для скачивания
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+
+          // Получаем имя файла из заголовков
+          const contentDisposition = response.headers.get(
+            "content-disposition"
+          );
+          let filename = `book_${bookId}.pdf`;
+          if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+            if (filenameMatch && filenameMatch[1]) {
+              filename = filenameMatch[1];
+            }
+          }
+
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+
+      document
+        .getElementById("export-books")
+        .addEventListener("click", async () => {
+          try {
+            const response = await fetch("/export-books");
+
+            if (!response.ok) throw new Error("Ошибка при экспорте");
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "books_export.csv";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+          } catch (err) {
+            alert("Ошибка: " + err.message);
+          }
         });
 
       // Поиск по ID
@@ -338,6 +497,45 @@
             alert("Книги удалены");
           } catch (error) {
             alert(error.message);
+          }
+        });
+
+      document
+        .getElementById("update-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (!window.currentUser?.isAdmin) {
+            alert("Требуются права администратора");
+            return;
+          }
+
+          const id = document.getElementById("update-book-id").value;
+          const name = document.getElementById("update-book-name").value;
+          const publish_date =
+            document.getElementById("update-book-date").value;
+          const publisher = document.getElementById(
+            "update-book-publisher"
+          ).value;
+          const count = parseInt(
+            document.getElementById("update-book-count").value
+          );
+
+          try {
+            const res = await fetch(`/books/${id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name, publish_date, publisher, count }),
+            });
+
+            const data = await res.json();
+            if (!res.ok)
+              throw new Error(data.error || "Ошибка при обновлении книги");
+
+            alert("Книга успешно обновлена");
+            document.getElementById("update-form").reset();
+            loadBooks();
+          } catch (err) {
+            alert(err.message);
           }
         });
 
